@@ -9,7 +9,7 @@ type UserProfileType = {
 const UserProfile = ({ onExit }: UserProfileType) => {
   const name = useMemo(() => {
     const user = localStorage.getItem('user');
-    if (localStorage.getItem('user')) return user?.replaceAll('"', '');
+    if (user) return user?.replaceAll('"', '');
   }, []);
 
   const handleExit = () => {
