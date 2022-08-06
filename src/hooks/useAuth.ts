@@ -1,8 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 export const useAuth = () => {
   const [isAuth, setIsAuth] = useState<boolean>();
-  const user = localStorage.getItem('user');
+
+  const user = useMemo(() => {
+    return localStorage.getItem('user') || sessionStorage.getItem('user');
+  }, []);
+
+  const outAuth = useCallback(() => {
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+  }, []);
+
+  const inAuth = useCallback((remindMe: boolean, user: string) => {
+    remindMe
+      ? localStorage.setItem('user', user.replaceAll('"', ''))
+      : sessionStorage.setItem('user', user.replaceAll('"', ''));
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -12,5 +26,5 @@ export const useAuth = () => {
     }
   }, [user]);
 
-  return { isAuth };
+  return { isAuth, inAuth, outAuth, user };
 };

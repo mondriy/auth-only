@@ -6,6 +6,7 @@ import { User } from 'shared/models/User';
 import { Form } from './Form.style';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { useAuth } from 'hooks';
 
 type AuthFormType = {
   onAccess: (result: string | Error) => void;
@@ -25,14 +26,16 @@ const AuthForm = ({ onAccess }: AuthFormType) => {
     mode: 'onBlur',
     resolver: yupResolver(schema),
   });
+  const { inAuth } = useAuth();
   const [error, setError] = useState<string | false>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [remindMe, setRemindMe] = useState<boolean>(false);
 
   const handleAuth: SubmitHandler<User> = (user) => {
     setLoading(true);
     UserService.authorization(user)
       .then((result) => {
-        localStorage.setItem('user', JSON.stringify(result));
+        inAuth(remindMe, JSON.stringify(result));
         onAccess(result);
       })
       .catch((error) => setError(error.message))
@@ -56,7 +59,9 @@ const AuthForm = ({ onAccess }: AuthFormType) => {
         error={!!errors.password}
         errorMesage={errors?.password?.message}
       />
-      <CheckBox>Запомнить пароль</CheckBox>
+      <CheckBox checked={remindMe} onChange={() => setRemindMe(!remindMe)}>
+        Запомнить пароль
+      </CheckBox>
       <Button disabled={loading} type='submit'>
         Войти
       </Button>
